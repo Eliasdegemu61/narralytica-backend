@@ -1,0 +1,205 @@
+{
+  "snapshot": {
+    "snapshot_time_utc": "2026-04-19T17:32:07.636712Z",
+    "asset": "BTC",
+    "reference_price": 75302.0,
+    "reference_price_date": "2026-04-19",
+    "price_source": "sodex_perps_klines"
+  },
+  "signal": {
+    "asset": "BTC",
+    "overall_signal": "bullish",
+    "total_score": 8,
+    "components": [
+      {
+        "name": "etf_trend",
+        "label": "bullish",
+        "score": 3,
+        "details": {
+          "latest_date": "2026-04-17",
+          "latest_net_inflow_usd": 663911366.465,
+          "five_day_net_inflow_usd": 996375546.47,
+          "positive_days_last_5": 4,
+          "raw_score": 2,
+          "effective_score": 3
+        }
+      },
+      {
+        "name": "positioning",
+        "label": "neutral",
+        "score": 0,
+        "details": {
+          "latest_date": "2026-04-19",
+          "latest_long_short_ratio": 0.795,
+          "latest_long_account_share": 0.4429,
+          "latest_short_account_share": 0.5571,
+          "average_ratio_sample": 0.71494,
+          "raw_score": 0,
+          "effective_score": 0
+        }
+      },
+      {
+        "name": "price_confirmation",
+        "label": "neutral",
+        "score": 0,
+        "details": {
+          "latest_date": "2026-04-19",
+          "latest_close": 75302.0,
+          "daily_return_pct": -0.4639604510065731,
+          "sample_return_pct": 0.7034342569808505,
+          "sma_3": 75996.33333333333,
+          "sma_5": 75574.2,
+          "source": "sodex_perps_klines",
+          "raw_score": 0,
+          "effective_score": 0
+        }
+      },
+      {
+        "name": "funding_rates",
+        "label": "bullish",
+        "score": 2,
+        "details": {
+          "latest_time": "2026-04-19",
+          "latest_funding_rate": -0.00012276,
+          "average_funding_rate_sample": -7.911599999999999e-05,
+          "extreme_threshold": 0.0001,
+          "sample_size": 5,
+          "mark_price": 75807.7,
+          "raw_score": 2,
+          "effective_score": 2
+        }
+      },
+      {
+        "name": "futures_open_interest",
+        "label": "neutral",
+        "score": 0,
+        "details": {
+          "latest_date": "2026-04-14",
+          "latest_open_interest": 56354492910.0,
+          "previous_open_interest": 56829006167.0,
+          "open_interest_change_pct": -0.8349842606882429,
+          "latest_reference_price": 74131.55,
+          "reference_price_change_pct": -0.906884227627891,
+          "binance_open_interest": 9388418586.0,
+          "cme_open_interest": 9041895219.0,
+          "raw_score": 0,
+          "effective_score": 0
+        }
+      },
+      {
+        "name": "depth_asymmetry",
+        "label": "bullish",
+        "score": 2,
+        "details": {
+          "asset": "BTC",
+          "depth_ratio": 1.296487088791445,
+          "weighted_cost_to_move_up_usd": 10574847.087245129,
+          "weighted_cost_to_move_down_usd": 13710152.71455713,
+          "markets_used": [
+            {
+              "market": "Binance",
+              "price": 75282.0,
+              "turnover_24h": 724557939.0,
+              "cost_to_move_up_usd": 14179511.0,
+              "cost_to_move_down_usd": 20408722.0
+            },
+            {
+              "market": "Bybit",
+              "price": 75244.0,
+              "turnover_24h": 549622886.0,
+              "cost_to_move_up_usd": 6560088.0,
+              "cost_to_move_down_usd": 7144914.0
+            },
+            {
+              "market": "Coinbase Exchange",
+              "price": 75286.0,
+              "turnover_24h": 326564021.0,
+              "cost_to_move_up_usd": 15691439.0,
+              "cost_to_move_down_usd": 16922662.0
+            },
+            {
+              "market": "Gate",
+              "price": 75241.0,
+              "turnover_24h": 316133415.0,
+              "cost_to_move_up_usd": 7984308.0,
+              "cost_to_move_down_usd": 9206491.0
+            },
+            {
+              "market": "Binance",
+              "price": 75306.0,
+              "turnover_24h": 287004145.0,
+              "cost_to_move_up_usd": 6194690.0,
+              "cost_to_move_down_usd": 10677346.0
+            }
+          ],
+          "raw_score": 2,
+          "effective_score": 2
+        }
+      },
+      {
+        "name": "breadth_regime",
+        "label": "neutral",
+        "score": 0,
+        "details": {
+          "sector_name": "BTC",
+          "sector_change_pct_24h": -0.0078,
+          "sector_marketcap_dom": 0.5866,
+          "index_snapshots": {
+            "ssiMAG7": {
+              "price": 13.82591958153,
+              "change_pct_24h": -0.0103,
+              "roi_7d": 0.0571,
+              "roi_1m": 0.0157,
+              "roi_3m": -0.2688,
+              "roi_1y": -0.1835,
+              "ytd": -0.2145
+            },
+            "ssiCeFi": {
+              "price": 20.056454648347,
+              "change_pct_24h": -0.0135,
+              "roi_7d": 0.0487,
+              "roi_1m": -0.0339,
+              "roi_3m": -0.3171,
+              "roi_1y": 0.0612,
+              "ytd": -0.2754
+            }
+          },
+          "raw_score": 0,
+          "effective_score": 0
+        }
+      },
+      {
+        "name": "fear_greed",
+        "label": "bullish",
+        "score": 1,
+        "details": {
+          "latest_date": "2026-04-14",
+          "latest_index_value": 23.0,
+          "previous_index_value": 23.0,
+          "raw_score": 1,
+          "effective_score": 1
+        }
+      }
+    ]
+  },
+  "decision": {
+    "asset": "BTC",
+    "market_bias": "long",
+    "conviction": "medium",
+    "action": "spot_long",
+    "setup": "trend_follow",
+    "position_size_bucket": "medium",
+    "why": [
+      "ETF trend is bullish",
+      "spot depth is more resilient on the downside",
+      "funding is not overcrowded against longs",
+      "fear is elevated but stabilizing"
+    ],
+    "invalidations": [
+      "price component flips bearish",
+      "ETF 5-day flow turns negative",
+      "depth asymmetry turns bearish",
+      "open interest starts building against price"
+    ]
+  }
+}

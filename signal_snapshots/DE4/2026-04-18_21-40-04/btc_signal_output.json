@@ -1,0 +1,77 @@
+{
+  "signal": {
+    "asset": "BTC",
+    "overall_signal": "neutral",
+    "total_score": -1,
+    "components": [
+      {
+        "name": "etf_trend",
+        "label": "bullish",
+        "score": 2,
+        "details": {
+          "latest_date": "2026-04-17",
+          "latest_net_inflow_usd": 663911366.465,
+          "five_day_net_inflow_usd": 996375546.47,
+          "positive_days_last_5": 4
+        }
+      },
+      {
+        "name": "positioning",
+        "label": "bearish",
+        "score": -2,
+        "details": {
+          "latest_date": "2026-04-18",
+          "latest_long_short_ratio": 0.601,
+          "latest_long_account_share": 0.3754,
+          "latest_short_account_share": 0.6246,
+          "average_ratio_sample": 0.70462
+        }
+      },
+      {
+        "name": "price_confirmation",
+        "label": "neutral",
+        "score": 0,
+        "details": {
+          "latest_date": "2026-04-18",
+          "latest_close": 75525.0,
+          "daily_return_pct": -1.955057054951903,
+          "sample_return_pct": 1.910699105371827,
+          "sma_3": 75887.33333333333,
+          "sma_5": 75309.4,
+          "source": "sodex_perps_klines"
+        }
+      },
+      {
+        "name": "funding_rates",
+        "label": "bearish",
+        "score": -1,
+        "details": {
+          "latest_time": "2026-04-18",
+          "latest_funding_rate": -4.586e-05,
+          "average_funding_rate_sample": -5.5548e-05,
+          "extreme_threshold": 0.0001,
+          "sample_size": 5,
+          "mark_price": 76124.8
+        }
+      }
+    ]
+  },
+  "decision": {
+    "asset": "BTC",
+    "market_bias": "neutral",
+    "conviction": "low",
+    "action": "wait",
+    "setup": "wait",
+    "position_size_bucket": "small",
+    "why": [
+      "ETF trend is bullish",
+      "positioning is favoring the short side",
+      "funding is less supportive for aggressive leverage",
+      "signals are mixed across components"
+    ],
+    "invalidations": [
+      "at least 3 components align in one direction",
+      "total score moves out of the neutral band"
+    ]
+  }
+}

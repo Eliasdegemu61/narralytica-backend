@@ -1,0 +1,358 @@
+{
+  "asset": "ETH",
+  "updated_at": "2026-04-19T18:05:24.082399Z",
+  "headline": {
+    "title": "ETH remains in wait mode",
+    "summary": "The engine sees useful information, but not enough clean alignment for action."
+  },
+  "component_cards": [
+    {
+      "name": "ETF Trend",
+      "state": "bullish",
+      "score": 3,
+      "visual_score": 95,
+      "summary": "ETF flows remain supportive.",
+      "calc_hint": "Latest ETF flow and the recent 5-period aggregate are used to frame institutional demand.",
+      "evidence": {
+        "latest_date": "2026-04-17",
+        "latest_net_inflow_usd": 127485084.77,
+        "five_day_net_inflow_usd": 275826178.84,
+        "positive_days_last_5": 5
+      }
+    },
+    {
+      "name": "Positioning",
+      "state": "bullish",
+      "score": 2,
+      "visual_score": 85,
+      "summary": "Positioning supports the long side.",
+      "calc_hint": "The latest long-short ratio is compared with both 1.0 and its recent average.",
+      "evidence": {
+        "latest_date": "2026-04-19",
+        "latest_long_short_ratio": 1.7716,
+        "latest_long_account_share": 0.6392,
+        "latest_short_account_share": 0.3608,
+        "average_ratio_sample": 1.42674
+      }
+    },
+    {
+      "name": "Price Confirmation",
+      "state": "neutral",
+      "score": 0,
+      "visual_score": 50,
+      "summary": "Price is holding without full confirmation.",
+      "calc_hint": "Recent close, daily return, and short moving averages are compared for confirmation.",
+      "evidence": {
+        "latest_date": "2026-04-19",
+        "latest_close": 2292.4,
+        "daily_return_pct": -2.405381242283622,
+        "sample_return_pct": -2.790263760495282,
+        "sma_3": 2353.5666666666666,
+        "sma_5": 2353.16,
+        "source": "sodex_perps_klines"
+      }
+    },
+    {
+      "name": "Funding",
+      "state": "bullish",
+      "score": 2,
+      "visual_score": 85,
+      "summary": "Funding is easing crowding pressure.",
+      "calc_hint": "Latest funding is compared with both an extreme threshold and the recent average.",
+      "evidence": {
+        "latest_time": "2026-04-19",
+        "latest_funding_rate": -0.00022976,
+        "average_funding_rate_sample": -0.00012186,
+        "extreme_threshold": 0.0001,
+        "sample_size": 5,
+        "mark_price": 2329.46
+      }
+    },
+    {
+      "name": "Futures Open Interest",
+      "state": "bearish",
+      "score": -2,
+      "visual_score": 15,
+      "summary": "Open interest is building against weak price.",
+      "calc_hint": "Recent total open interest is compared with price direction to detect leverage support or crowding.",
+      "evidence": {
+        "latest_date": "2026-04-18",
+        "latest_open_interest": 61692410495.0,
+        "previous_open_interest": 56636749733.0,
+        "open_interest_change_pct": 8.926466977419544,
+        "latest_reference_price": 75691.76,
+        "reference_price_change_pct": -1.7908449242267088,
+        "binance_open_interest": 10776372519.0,
+        "cme_open_interest": 9748849037.0
+      }
+    },
+    {
+      "name": "Depth Asymmetry",
+      "state": "bullish",
+      "score": 2,
+      "visual_score": 85,
+      "summary": "Spot depth is more resilient on the downside.",
+      "calc_hint": "Turnover-weighted pair depth compares the cost to move price down versus up by 2%.",
+      "evidence": {
+        "depth_ratio": 1.706954193484311,
+        "weighted_cost_to_move_up_usd": 7228058.897624291,
+        "weighted_cost_to_move_down_usd": 12337965.44605137,
+        "markets_used": [
+          {
+            "market": "Binance",
+            "price": 2299.47,
+            "turnover_24h": 446653509.0,
+            "cost_to_move_up_usd": 14211414.0,
+            "cost_to_move_down_usd": 27593701.0
+          },
+          {
+            "market": "Bybit",
+            "price": 2298.13,
+            "turnover_24h": 324252038.0,
+            "cost_to_move_up_usd": 4376329.0,
+            "cost_to_move_down_usd": 5333581.0
+          },
+          {
+            "market": "Binance",
+            "price": 2297.33,
+            "turnover_24h": 292473781.0,
+            "cost_to_move_up_usd": 2033542.0,
+            "cost_to_move_down_usd": 3325944.0
+          },
+          {
+            "market": "OKX",
+            "price": 2299.05,
+            "turnover_24h": 251708079.0,
+            "cost_to_move_up_usd": 6804246.0,
+            "cost_to_move_down_usd": 11600310.0
+          },
+          {
+            "market": "Gate",
+            "price": 2296.64,
+            "turnover_24h": 225686509.0,
+            "cost_to_move_up_usd": 4708973.0,
+            "cost_to_move_down_usd": 4710624.0
+          }
+        ]
+      }
+    },
+    {
+      "name": "Breadth Regime",
+      "state": "neutral",
+      "score": 0,
+      "visual_score": 50,
+      "summary": "Breadth is mixed across sectors and indices.",
+      "calc_hint": "Relevant sector performance and index snapshots are used to judge whether the move is broad or narrow.",
+      "evidence": {
+        "sector_name": "ETH",
+        "sector_change_pct_24h": -0.0275,
+        "sector_marketcap_dom": 0.1085,
+        "index_snapshots": {
+          "ssiLayer1": {
+            "price": 9.357353096517,
+            "change_pct_24h": -0.0219,
+            "roi_7d": 0.0447,
+            "roi_1m": 0.031,
+            "roi_3m": -0.2749,
+            "roi_1y": 0.0827,
+            "ytd": -0.223
+          },
+          "ssiDeFi": {
+            "price": 5.031354336862,
+            "change_pct_24h": -0.048,
+            "roi_7d": 0.0509,
+            "roi_1m": 0.0146,
+            "roi_3m": -0.045,
+            "roi_1y": -0.2407,
+            "ytd": -0.0355
+          }
+        }
+      }
+    },
+    {
+      "name": "Fear & Greed",
+      "state": "neutral",
+      "score": 0,
+      "visual_score": 50,
+      "summary": "Sentiment is not at an extreme.",
+      "calc_hint": "Fear & greed is used as a light regime filter rather than a primary trigger.",
+      "evidence": {
+        "latest_date": "2026-04-18",
+        "latest_index_value": 27.0,
+        "previous_index_value": 26.0
+      }
+    }
+  ],
+  "decision_summary": {
+    "action": "wait",
+    "market_bias": "long",
+    "conviction": "low",
+    "setup": "wait",
+    "position_size_bucket": "small",
+    "summary": "ETF trend is bullish | open interest is building against weak price | spot depth is more resilient on the downside | positioning is supporting the long side"
+  },
+  "evidence": {
+    "total_score": 7,
+    "overall_signal": "bullish",
+    "supporting_components": [
+      "ETF Trend",
+      "Positioning",
+      "Funding",
+      "Depth Asymmetry"
+    ],
+    "opposing_components": [
+      "Futures Open Interest"
+    ],
+    "raw_data_used": {
+      "etf": {
+        "latest_date": "2026-04-17",
+        "latest_net_inflow_usd": 127485084.77,
+        "five_day_net_inflow_usd": 275826178.84,
+        "positive_days_last_5": 5,
+        "raw_score": 2,
+        "effective_score": 3
+      },
+      "positioning": {
+        "latest_date": "2026-04-19",
+        "latest_long_short_ratio": 1.7716,
+        "latest_long_account_share": 0.6392,
+        "latest_short_account_share": 0.3608,
+        "average_ratio_sample": 1.42674,
+        "raw_score": 2,
+        "effective_score": 2
+      },
+      "price": {
+        "latest_date": "2026-04-19",
+        "latest_close": 2292.4,
+        "daily_return_pct": -2.405381242283622,
+        "sample_return_pct": -2.790263760495282,
+        "sma_3": 2353.5666666666666,
+        "sma_5": 2353.16,
+        "source": "sodex_perps_klines",
+        "raw_score": 0,
+        "effective_score": 0
+      },
+      "funding": {
+        "latest_time": "2026-04-19",
+        "latest_funding_rate": -0.00022976,
+        "average_funding_rate_sample": -0.00012186,
+        "extreme_threshold": 0.0001,
+        "sample_size": 5,
+        "mark_price": 2329.46,
+        "raw_score": 2,
+        "effective_score": 2
+      },
+      "open_interest": {
+        "latest_date": "2026-04-18",
+        "latest_open_interest": 61692410495.0,
+        "previous_open_interest": 56636749733.0,
+        "open_interest_change_pct": 8.926466977419544,
+        "latest_reference_price": 75691.76,
+        "reference_price_change_pct": -1.7908449242267088,
+        "binance_open_interest": 10776372519.0,
+        "cme_open_interest": 9748849037.0,
+        "raw_score": -2,
+        "effective_score": -2
+      },
+      "depth": {
+        "asset": "ETH",
+        "depth_ratio": 1.706954193484311,
+        "weighted_cost_to_move_up_usd": 7228058.897624291,
+        "weighted_cost_to_move_down_usd": 12337965.44605137,
+        "markets_used": [
+          {
+            "market": "Binance",
+            "price": 2299.47,
+            "turnover_24h": 446653509.0,
+            "cost_to_move_up_usd": 14211414.0,
+            "cost_to_move_down_usd": 27593701.0
+          },
+          {
+            "market": "Bybit",
+            "price": 2298.13,
+            "turnover_24h": 324252038.0,
+            "cost_to_move_up_usd": 4376329.0,
+            "cost_to_move_down_usd": 5333581.0
+          },
+          {
+            "market": "Binance",
+            "price": 2297.33,
+            "turnover_24h": 292473781.0,
+            "cost_to_move_up_usd": 2033542.0,
+            "cost_to_move_down_usd": 3325944.0
+          },
+          {
+            "market": "OKX",
+            "price": 2299.05,
+            "turnover_24h": 251708079.0,
+            "cost_to_move_up_usd": 6804246.0,
+            "cost_to_move_down_usd": 11600310.0
+          },
+          {
+            "market": "Gate",
+            "price": 2296.64,
+            "turnover_24h": 225686509.0,
+            "cost_to_move_up_usd": 4708973.0,
+            "cost_to_move_down_usd": 4710624.0
+          }
+        ],
+        "raw_score": 2,
+        "effective_score": 2
+      },
+      "breadth": {
+        "sector_name": "ETH",
+        "sector_change_pct_24h": -0.0275,
+        "sector_marketcap_dom": 0.1085,
+        "index_snapshots": {
+          "ssiLayer1": {
+            "price": 9.357353096517,
+            "change_pct_24h": -0.0219,
+            "roi_7d": 0.0447,
+            "roi_1m": 0.031,
+            "roi_3m": -0.2749,
+            "roi_1y": 0.0827,
+            "ytd": -0.223
+          },
+          "ssiDeFi": {
+            "price": 5.031354336862,
+            "change_pct_24h": -0.048,
+            "roi_7d": 0.0509,
+            "roi_1m": 0.0146,
+            "roi_3m": -0.045,
+            "roi_1y": -0.2407,
+            "ytd": -0.0355
+          }
+        },
+        "raw_score": 0,
+        "effective_score": 0
+      },
+      "fear_greed": {
+        "latest_date": "2026-04-18",
+        "latest_index_value": 27.0,
+        "previous_index_value": 26.0,
+        "raw_score": 0,
+        "effective_score": 0
+      }
+    },
+    "calculation_notes": {
+      "etf": "ETF trend uses the latest flow and the recent 5-period aggregate.",
+      "positioning": "Positioning compares the latest long-short ratio with 1.0 and its recent sample average.",
+      "price": "Price confirmation uses the latest close, daily return, and short moving averages from recent daily candles.",
+      "funding": "Funding compares the latest print with an extreme threshold and with the recent funding average.",
+      "open_interest": "Open interest compares recent aggregate futures interest with price direction for leverage confirmation.",
+      "depth": "Depth asymmetry uses turnover-weighted pair depth to compare downside support against upside resistance.",
+      "breadth": "Breadth compares the asset sector and relevant SoSoValue indices to determine whether the move is broad or narrow.",
+      "fear_greed": "Fear & greed is used as a light sentiment filter at emotional extremes."
+    }
+  },
+  "why": [
+    "ETF trend is bullish",
+    "open interest is building against weak price",
+    "spot depth is more resilient on the downside",
+    "positioning is supporting the long side"
+  ],
+  "invalidations": [
+    "price confirmation turns clearly bullish with stronger agreement",
+    "depth asymmetry improves materially"
+  ]
+}
