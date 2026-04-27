@@ -2,6 +2,24 @@
 
 Python signal jobs for generating Narralytica asset signals and publishing the latest state to Supabase.
 
+## What It Does
+
+Turns live crypto market structure into machine-readable decision signals and website-ready market state.
+
+## Why It's Different
+
+Narralytica is not a single-indicator alert bot. It combines up to 8 market signal families into one decision layer, keeps working even when some data is unavailable, and publishes a structured output that the website can use directly without re-computing the logic in the frontend.
+
+## What The User Gets
+
+- a current asset-level signal
+- a directional action
+- a conviction level
+- a position-size bucket
+- invalidation context
+- market overview payloads for the website
+- quick-trade inputs for BTC and ETH
+
 The backend is responsible for:
 
 - building multi-factor asset signals
