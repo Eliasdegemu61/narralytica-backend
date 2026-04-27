@@ -179,6 +179,20 @@ Create those tables in Supabase with:
   `https://mainnet-gw.sodex.dev/api/v1/perps/markets/{symbol}/klines`
 - Binance funding rates:
   `https://fapi.binance.com/fapi/v1/fundingRate`
+- SoSoValue futures open interest:
+  chart-based futures open interest feed from the SoSoValue analysis API
+- SoSoValue pair-depth asymmetry:
+  SoSoValue currency pairs and market depth data
+- SoSoValue sector and index breadth regime:
+  SoSoValue sector spotlight plus index market snapshot data
+- SoSoValue fear and greed overlay:
+  chart-based fear and greed feed from the SoSoValue analysis API
+- SoSoValue currency market snapshot:
+  used to refresh the latest reference price on top of recent daily context
+- SoSoValue currency klines:
+  used for daily price confirmation context where supported
+- CoinDesk RSS:
+  used for the website news timeline and chart-marker pipeline
 
 ## Notes
 
