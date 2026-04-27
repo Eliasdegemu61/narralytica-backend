@@ -52,6 +52,8 @@ def fetch_json(
             with request.urlopen(req, timeout=timeout) as response:
                 charset = response.headers.get_content_charset() or "utf-8"
                 text = response.read().decode(charset)
+                if not text.strip():
+                    return None
                 return json.loads(text)
         except URLError as exc:
             last_error = exc
@@ -62,3 +64,44 @@ def fetch_json(
     if last_error is not None:
         raise last_error
     raise RuntimeError("fetch_json failed without raising a specific error")
+
+
+def fetch_text(
+    url: str,
+    *,
+    method: str = "GET",
+    params: dict[str, Any] | None = None,
+    headers: dict[str, str] | None = None,
+    timeout: int = DEFAULT_TIMEOUT_SECONDS,
+    retries: int = DEFAULT_RETRIES,
+) -> str:
+    full_url = url
+    if params:
+        query = parse.urlencode(params, doseq=True)
+        separator = "&" if "?" in url else "?"
+        full_url = f"{url}{separator}{query}"
+
+    final_headers = dict(DEFAULT_HEADERS)
+    final_headers.update(headers or {})
+
+    req = request.Request(
+        full_url,
+        method=method.upper(),
+        headers=final_headers,
+    )
+
+    last_error: Exception | None = None
+    for attempt in range(retries):
+        try:
+            with request.urlopen(req, timeout=timeout) as response:
+                charset = response.headers.get_content_charset() or "utf-8"
+                return response.read().decode(charset, errors="replace")
+        except URLError as exc:
+            last_error = exc
+            if attempt == retries - 1:
+                raise
+            time.sleep(DEFAULT_RETRY_DELAY_SECONDS * (attempt + 1))
+
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError("fetch_text failed without raising a specific error")

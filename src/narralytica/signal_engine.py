@@ -28,26 +28,122 @@ ASSET_CONFIG = {
     "BTC": {
         "symbol": "BTCUSDT",
         "etf_type": "us-btc-spot",
-        "has_etf": True,
         "currency_id": "1673723677362319866",
         "sector_name": "BTC",
         "index_tickers": ("ssiMAG7", "ssiCeFi"),
+        "positioning_chart": "binance_btcusdt_futures_long_short_ratio_1d",
+        "funding_chart": "funding_rate",
+        "has_futures_open_interest": True,
     },
     "ETH": {
         "symbol": "ETHUSDT",
         "etf_type": "us-eth-spot",
-        "has_etf": True,
         "currency_id": "1673723677362319867",
         "sector_name": "ETH",
         "index_tickers": ("ssiLayer1", "ssiDeFi"),
+        "positioning_chart": None,
+        "funding_chart": None,
+        "has_futures_open_interest": False,
     },
     "SOL": {
         "symbol": "SOLUSDT",
         "etf_type": None,
-        "has_etf": False,
-        "currency_id": None,
+        "currency_id": "1673723677362319875",
         "sector_name": "Layer1",
         "index_tickers": ("ssiLayer1",),
+        "positioning_chart": None,
+        "funding_chart": None,
+        "has_futures_open_interest": False,
+    },
+    "XRP": {
+        "symbol": "XRPUSDT",
+        "etf_type": None,
+        "currency_id": "1673723677362319871",
+        "sector_name": "PayFi",
+        "index_tickers": ("ssiPayFi",),
+        "positioning_chart": None,
+        "funding_chart": None,
+        "has_futures_open_interest": False,
+    },
+    "ADA": {
+        "symbol": "ADAUSDT",
+        "etf_type": None,
+        "currency_id": "1673723677362319873",
+        "sector_name": "Layer1",
+        "index_tickers": ("ssiLayer1",),
+        "positioning_chart": None,
+        "funding_chart": None,
+        "has_futures_open_interest": False,
+    },
+    "DOGE": {
+        "symbol": "DOGEUSDT",
+        "etf_type": None,
+        "currency_id": "1673723677362319874",
+        "sector_name": "Meme",
+        "index_tickers": ("ssiMeme",),
+        "positioning_chart": None,
+        "funding_chart": None,
+        "has_futures_open_interest": False,
+    },
+    "AVAX": {
+        "symbol": "AVAXUSDT",
+        "etf_type": None,
+        "currency_id": "1673723677362319883",
+        "sector_name": "Layer1",
+        "index_tickers": ("ssiLayer1",),
+        "positioning_chart": None,
+        "funding_chart": None,
+        "has_futures_open_interest": False,
+    },
+    "LINK": {
+        "symbol": "LINKUSDT",
+        "etf_type": None,
+        "currency_id": "1673723677362319887",
+        "sector_name": "DeFi",
+        "index_tickers": ("ssiDeFi",),
+        "positioning_chart": None,
+        "funding_chart": None,
+        "has_futures_open_interest": False,
+    },
+    "HBAR": {
+        "symbol": "HBARUSDT",
+        "etf_type": None,
+        "currency_id": "1673723677362319900",
+        "sector_name": "Layer1",
+        "index_tickers": ("ssiLayer1",),
+        "positioning_chart": None,
+        "funding_chart": None,
+        "has_futures_open_interest": False,
+    },
+    "SUI": {
+        "symbol": "SUIUSDT",
+        "etf_type": None,
+        "currency_id": "1673723677362319954",
+        "sector_name": "Layer1",
+        "index_tickers": ("ssiLayer1",),
+        "positioning_chart": None,
+        "funding_chart": None,
+        "has_futures_open_interest": False,
+    },
+    "BNB": {
+        "symbol": "BNBUSDT",
+        "etf_type": None,
+        "currency_id": "1673723677362319869",
+        "sector_name": "CeFi",
+        "index_tickers": ("ssiCeFi",),
+        "positioning_chart": None,
+        "funding_chart": None,
+        "has_futures_open_interest": False,
+    },
+    "SOSO": {
+        "symbol": "SOSOUSDT",
+        "etf_type": None,
+        "currency_id": None,
+        "sector_name": None,
+        "index_tickers": (),
+        "positioning_chart": None,
+        "funding_chart": None,
+        "has_futures_open_interest": False,
     },
 }
 
@@ -111,6 +207,18 @@ def summarize_missing_etf(asset: str) -> SignalComponent:
     )
 
 
+def summarize_unavailable_component(component_name: str, *, asset: str, reason: str) -> SignalComponent:
+    return SignalComponent(
+        name=component_name,
+        score=0,
+        label="unavailable",
+        details={
+            "asset": asset,
+            "reason": reason,
+        },
+    )
+
+
 def summarize_positioning(rows: list[dict[str, Any]]) -> SignalComponent:
     if not rows:
         raise ValueError("Binance positioning data is empty")
@@ -149,7 +257,7 @@ def summarize_sodex_price_confirmation(klines: list[dict[str, Any]]) -> SignalCo
     if len(klines) < 5:
         raise ValueError("At least 5 SoDEX klines are required for price confirmation")
 
-    ordered = list(reversed(klines))
+    ordered = sorted(klines, key=lambda row: int(row["t"]))
     closes = [float(row["c"]) for row in ordered]
     latest = ordered[-1]
     latest_close = float(latest["c"])
@@ -181,7 +289,7 @@ def summarize_sodex_price_confirmation(klines: list[dict[str, Any]]) -> SignalCo
             "sample_return_pct": sample_return_pct,
             "sma_3": sma_3,
             "sma_5": sma_5,
-            "source": "sodex_perps_klines",
+            "source": latest.get("source", "market_klines"),
         },
     )
 
@@ -356,7 +464,15 @@ def summarize_breadth_regime(
     index_snapshots: dict[str, dict[str, Any]],
 ) -> SignalComponent:
     config = ASSET_CONFIG[asset]
-    sector_row = _get_sector_row(sector_payload, config["sector_name"])
+    sector_name = config.get("sector_name")
+    if not sector_name:
+        return summarize_unavailable_component(
+            "breadth_regime",
+            asset=asset,
+            reason="No breadth mapping configured for this asset",
+        )
+
+    sector_row = _get_sector_row(sector_payload, sector_name)
     sector_change = _to_float(sector_row.get("change_pct_24h")) if sector_row else 0.0
     sector_dom = _to_float(sector_row.get("marketcap_dom")) if sector_row else 0.0
     relevant_snapshots = {ticker: snapshot for ticker, snapshot in index_snapshots.items() if snapshot}
@@ -375,7 +491,7 @@ def summarize_breadth_regime(
         score=score,
         label=_label_from_score(score),
         details={
-            "sector_name": config["sector_name"],
+            "sector_name": sector_name,
             "sector_change_pct_24h": sector_change,
             "sector_marketcap_dom": sector_dom,
             "index_snapshots": relevant_snapshots,
@@ -385,12 +501,30 @@ def summarize_breadth_regime(
 
 def _weighted_component_score(component: SignalComponent) -> int:
     """Convert raw component scores into the effective score used in totals."""
+    if component.label == "unavailable":
+        return 0
     if component.name == "etf_trend":
         if component.score >= 2:
             return ETF_WEIGHTED_STRONG_SCORE
         if component.score <= -2:
             return -ETF_WEIGHTED_STRONG_SCORE
     return component.score
+
+
+def _component_score_cap(component: SignalComponent) -> int:
+    if component.label == "unavailable":
+        return 0
+    if component.name == "etf_trend":
+        return ETF_WEIGHTED_STRONG_SCORE
+    if component.name in {"breadth_regime", "fear_greed"}:
+        return 1
+    return 2
+
+
+def _score_bands(max_score: int) -> tuple[int, int]:
+    medium_threshold = max(1, round(max_score * (4 / 15)))
+    high_threshold = max(medium_threshold + 1, round(max_score * (8 / 15)))
+    return medium_threshold, high_threshold
 
 
 def _apply_etf_price_conflict_rule(
@@ -421,13 +555,20 @@ def _finalize_signal_snapshot(asset: str, components: list[SignalComponent]) -> 
         weighted_scores,
     )
 
+    available_components = [component for component in components if component.label != "unavailable"]
+    unavailable_components = [component.name for component in components if component.label == "unavailable"]
+    max_score = sum(_component_score_cap(component) for component in components)
+    medium_threshold, _ = _score_bands(max_score)
     total_score = sum(adjusted_scores.values())
-    overall = "bullish" if total_score >= 4 else "bearish" if total_score <= -4 else "neutral"
+    overall = "bullish" if total_score >= medium_threshold else "bearish" if total_score <= -medium_threshold else "neutral"
 
     return {
         "asset": asset,
         "overall_signal": overall,
         "total_score": total_score,
+        "available_component_count": len(available_components),
+        "unavailable_components": unavailable_components,
+        "max_score": max_score,
         "components": [
             {
                 "name": component.name,
@@ -448,14 +589,14 @@ def build_asset_signal_snapshot(
     asset: str,
     *,
     etf_rows: list[dict[str, Any]] | None,
-    positioning_rows: list[dict[str, Any]],
-    klines: list[dict[str, Any]],
-    funding_rows: list[dict[str, Any]],
-    fear_greed_rows: list[dict[str, Any]],
-    futures_open_interest_rows: list[dict[str, Any]],
-    pair_rows: list[dict[str, Any]],
-    sector_payload: dict[str, Any],
-    index_snapshots: dict[str, dict[str, Any]],
+    positioning_rows: list[dict[str, Any]] | None,
+    klines: list[dict[str, Any]] | None,
+    funding_rows: list[dict[str, Any]] | None,
+    fear_greed_rows: list[dict[str, Any]] | None,
+    futures_open_interest_rows: list[dict[str, Any]] | None,
+    pair_rows: list[dict[str, Any]] | None,
+    sector_payload: dict[str, Any] | None,
+    index_snapshots: dict[str, dict[str, Any]] | None,
 ) -> dict[str, Any]:
     normalized_asset = asset.upper()
     etf_component = (
@@ -463,16 +604,40 @@ def build_asset_signal_snapshot(
         if etf_rows is not None
         else summarize_missing_etf(normalized_asset)
     )
-    positioning = summarize_positioning(positioning_rows)
-    price = summarize_sodex_price_confirmation(klines)
-    funding = summarize_funding_rates(funding_rows)
-    fear_greed = summarize_fear_greed(fear_greed_rows)
-    futures_open_interest = summarize_futures_open_interest(futures_open_interest_rows)
-    depth_asymmetry = summarize_depth_asymmetry(normalized_asset, pair_rows)
+    positioning = (
+        summarize_positioning(positioning_rows)
+        if positioning_rows is not None
+        else summarize_unavailable_component("positioning", asset=normalized_asset, reason="No positioning source configured for this asset")
+    )
+    price = (
+        summarize_sodex_price_confirmation(klines)
+        if klines is not None
+        else summarize_unavailable_component("price_confirmation", asset=normalized_asset, reason="No price source configured for this asset")
+    )
+    funding = (
+        summarize_funding_rates(funding_rows)
+        if funding_rows is not None
+        else summarize_unavailable_component("funding_rates", asset=normalized_asset, reason="No funding source configured for this asset")
+    )
+    fear_greed = (
+        summarize_fear_greed(fear_greed_rows)
+        if fear_greed_rows is not None
+        else summarize_unavailable_component("fear_greed", asset=normalized_asset, reason="Fear & greed data is unavailable")
+    )
+    futures_open_interest = (
+        summarize_futures_open_interest(futures_open_interest_rows)
+        if futures_open_interest_rows is not None
+        else summarize_unavailable_component("futures_open_interest", asset=normalized_asset, reason="No futures open-interest source configured for this asset")
+    )
+    depth_asymmetry = (
+        summarize_depth_asymmetry(normalized_asset, pair_rows)
+        if pair_rows is not None
+        else summarize_unavailable_component("depth_asymmetry", asset=normalized_asset, reason="No trading pair depth data is available for this asset")
+    )
     breadth_regime = summarize_breadth_regime(
         asset=normalized_asset,
-        sector_payload=sector_payload,
-        index_snapshots=index_snapshots,
+        sector_payload=sector_payload or {},
+        index_snapshots=index_snapshots or {},
     )
 
     return _finalize_signal_snapshot(

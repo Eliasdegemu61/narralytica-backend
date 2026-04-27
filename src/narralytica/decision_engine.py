@@ -13,24 +13,32 @@ def _components_by_name(signal: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return {component["name"]: component for component in signal["components"]}
 
 
-def _base_bias_and_conviction(total_score: int) -> tuple[str, str]:
+def _score_bands(max_score: int) -> tuple[int, int]:
+    medium_threshold = max(1, round(max_score * (4 / 15)))
+    high_threshold = max(medium_threshold + 1, round(max_score * (8 / 15)))
+    return medium_threshold, high_threshold
+
+
+def _base_bias_and_conviction(total_score: int, *, max_score: int) -> tuple[str, str]:
     """Map total score into the base market bias and conviction bucket."""
-    if total_score >= 8:
+    medium_threshold, high_threshold = _score_bands(max_score)
+    if total_score >= high_threshold:
         return "long", "high"
-    if 4 <= total_score <= 7:
+    if medium_threshold <= total_score < high_threshold:
         return "long", "medium"
-    if -3 <= total_score <= 3:
+    if -medium_threshold < total_score < medium_threshold:
         return "neutral", "low"
-    if -7 <= total_score <= -4:
+    if -high_threshold < total_score <= -medium_threshold:
         return "short", "medium"
     return "short", "high"
 
 
 def _agreement_state(components: dict[str, dict[str, Any]]) -> tuple[str, str | None]:
     """Classify component agreement as strong or mixed."""
-    bullish_count = sum(1 for component in components.values() if component["label"] == "bullish")
-    bearish_count = sum(1 for component in components.values() if component["label"] == "bearish")
-    threshold = max(3, ceil(len(components) * 0.625))
+    available_components = [component for component in components.values() if component["label"] != "unavailable"]
+    bullish_count = sum(1 for component in available_components if component["label"] == "bullish")
+    bearish_count = sum(1 for component in available_components if component["label"] == "bearish")
+    threshold = max(2, ceil(len(available_components) * 0.625)) if available_components else 2
 
     if bullish_count >= threshold:
         return "strong", "bullish"
@@ -58,11 +66,15 @@ def _position_size_bucket(action: str, conviction: str) -> str:
 
 def _funding_is_strongly_bearish(funding_component: dict[str, Any]) -> bool:
     """Return True when funding meaningfully argues against longs."""
+    if funding_component["label"] == "unavailable":
+        return False
     return funding_component["score"] <= -2
 
 
 def _funding_is_extremely_negative(funding_component: dict[str, Any]) -> bool:
     """Return True when funding is already deeply negative for shorts."""
+    if funding_component["label"] == "unavailable":
+        return False
     details = funding_component["details"]
     return details["latest_funding_rate"] <= -details["extreme_threshold"]
 
@@ -138,17 +150,25 @@ def _build_why(
 def _build_invalidations(action: str, market_bias: str, components: dict[str, dict[str, Any]]) -> list[str]:
     """Generate simple rule-based invalidation conditions."""
     invalidations: list[str] = []
+    etf_available = components["etf_trend"]["label"] != "unavailable"
+    positioning_available = components["positioning"]["label"] != "unavailable"
+    funding_available = components["funding_rates"]["label"] != "unavailable"
+    open_interest_available = components["futures_open_interest"]["label"] != "unavailable"
 
     if action in {"spot_long", "perps_long"}:
         invalidations.append("price component flips bearish")
-        invalidations.append("ETF 5-day flow turns negative")
         invalidations.append("depth asymmetry turns bearish")
-        invalidations.append("open interest starts building against price")
+        if etf_available:
+            invalidations.append("ETF 5-day flow turns negative")
+        if open_interest_available:
+            invalidations.append("open interest starts building against price")
     elif action == "perps_short":
         invalidations.append("price component flips bullish")
-        invalidations.append("positioning stops supporting the short")
         invalidations.append("depth asymmetry turns bullish")
-        invalidations.append("funding becomes too negative for fresh shorts")
+        if positioning_available:
+            invalidations.append("positioning stops supporting the short")
+        if funding_available:
+            invalidations.append("funding becomes too negative for fresh shorts")
     else:
         if market_bias == "long":
             invalidations.append("price confirmation turns clearly bullish with stronger agreement")
@@ -166,8 +186,10 @@ def _build_invalidations(action: str, market_bias: str, components: dict[str, di
 def decide_from_signal(signal: dict[str, Any]) -> dict[str, Any]:
     """Turn a signal snapshot into one of four explicit trading actions."""
     total_score = signal["total_score"]
+    max_score = signal.get("max_score", 15)
+    medium_threshold, high_threshold = _score_bands(max_score)
     components = _components_by_name(signal)
-    market_bias, conviction = _base_bias_and_conviction(total_score)
+    market_bias, conviction = _base_bias_and_conviction(total_score, max_score=max_score)
     agreement, agreement_direction = _agreement_state(components)
 
     if agreement == "mixed":
@@ -179,14 +201,18 @@ def decide_from_signal(signal: dict[str, Any]) -> dict[str, Any]:
     funding = components["funding_rates"]
     open_interest = components["futures_open_interest"]
     depth = components["depth_asymmetry"]
+    has_derivatives_confirmation = (
+        funding["label"] != "unavailable" or open_interest["label"] != "unavailable"
+    )
 
     action = "wait"
     if (
-        total_score >= 8
+        total_score >= high_threshold
         and price["label"] == "bullish"
         and depth["label"] != "bearish"
-        and open_interest["label"] in {"bullish", "neutral"}
-        and funding["label"] in {"bullish", "neutral"}
+        and open_interest["label"] in {"bullish", "neutral", "unavailable"}
+        and funding["label"] in {"bullish", "neutral", "unavailable"}
+        and has_derivatives_confirmation
         and agreement == "strong"
         and agreement_direction == "bullish"
         and market_bias == "long"
@@ -194,8 +220,8 @@ def decide_from_signal(signal: dict[str, Any]) -> dict[str, Any]:
     ):
         action = "perps_long"
     elif (
-        total_score >= 4
-        and etf["label"] == "bullish"
+        total_score >= medium_threshold
+        and etf["label"] in {"bullish", "unavailable"}
         and price["label"] != "bearish"
         and depth["label"] != "bearish"
         and not _funding_is_strongly_bearish(funding)
@@ -204,9 +230,9 @@ def decide_from_signal(signal: dict[str, Any]) -> dict[str, Any]:
     ):
         action = "spot_long"
     elif (
-        total_score <= -8
+        total_score <= -high_threshold
         and price["label"] == "bearish"
-        and positioning["label"] == "bearish"
+        and positioning["label"] in {"bearish", "unavailable"}
         and depth["label"] == "bearish"
         and not _funding_is_extremely_negative(funding)
         and agreement == "strong"

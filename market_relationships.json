@@ -1,0 +1,572 @@
+{
+  "version": "2026-04-23",
+  "source": {
+    "sodex_docs": [
+      "https://sodex.com/documentation/api/api",
+      "https://sodex.com/documentation/api/rest-v1/sodex-rest-perps-api",
+      "https://sodex.com/documentation/api/rest-v1/sodex-rest-spot-api"
+    ],
+    "notes": [
+      "Perps and spot symbol availability should be verified against the live /markets/symbols endpoints before hardcoding symbols in production.",
+      "XAUT and gold-related symbols were not verified from SoDEX docs during this pass."
+    ]
+  },
+  "sodex": {
+    "base_urls": {
+      "perps": "https://mainnet-gw.sodex.dev/api/v1/perps",
+      "spot": "https://mainnet-gw.sodex.dev/api/v1/spot"
+    },
+    "symbol_conventions": {
+      "summary": [
+        "Perps symbols are usually plain symbols like BTC-USD or ETH-USD.",
+        "Spot symbols often use wrapped or venue-style prefixes such as v, for example vBTC_vUSDC.",
+        "Do not assume every asset follows the same prefix pattern; verify with the live /markets/symbols endpoint when possible."
+      ],
+      "perps_pattern_examples": [
+        {
+          "input_asset": "BTC",
+          "sodex_symbol": "BTC-USD",
+          "notes": "Perps pair format is typically BASE-USD."
+        },
+        {
+          "input_asset": "ETH",
+          "sodex_symbol": "ETH-USD",
+          "notes": "Perps pair format is typically BASE-USD."
+        }
+      ],
+      "spot_pattern_examples": [
+        {
+          "input_asset": "BTC",
+          "base_coin": "vBTC",
+          "quote_coin": "vUSDC",
+          "sodex_symbol": "vBTC_vUSDC",
+          "notes": "Spot pair format commonly looks like BASE_QUOTE, with wrapped asset prefixes such as v."
+        },
+        {
+          "input_asset": "ETH",
+          "base_coin": "vETH",
+          "quote_coin": "vUSDC",
+          "sodex_symbol": "vETH_vUSDC",
+          "notes": "Spot pair format commonly looks like BASE_QUOTE, with wrapped asset prefixes such as v."
+        }
+      ],
+      "prefix_hints": {
+        "v": "Often used for wrapped or venue-native spot assets and quote assets, such as vBTC or vUSDC.",
+        "w": "May be used by some ecosystems or wrapped-token naming conventions, but do not infer blindly without checking the live symbol list."
+      },
+      "translation_rules_for_antigravity": [
+        "If market type is perps, try BASE-USD first.",
+        "If market type is spot, try vBASE_vUSDC first for major assets.",
+        "If the exact symbol is unknown, fetch the live symbols list and match by normalized asset name before building the kline URL.",
+        "Normalized matching should ignore separators and compare plain asset names like BTC, ETH, SOL, XRP, and quote hints like USDC or USD."
+      ],
+      "fallback_discovery": {
+        "perps_symbols_endpoint": "https://mainnet-gw.sodex.dev/api/v1/perps/markets/symbols",
+        "spot_symbols_endpoint": "https://mainnet-gw.sodex.dev/api/v1/spot/markets/symbols"
+      }
+    },
+    "discovery_endpoints": {
+      "perps_symbols": "https://mainnet-gw.sodex.dev/api/v1/perps/markets/symbols",
+      "spot_symbols": "https://mainnet-gw.sodex.dev/api/v1/spot/markets/symbols"
+    },
+    "kline_templates": {
+      "perps": "https://mainnet-gw.sodex.dev/api/v1/perps/markets/{symbol}/klines?interval={interval}&limit={limit}",
+      "spot": "https://mainnet-gw.sodex.dev/api/v1/spot/markets/{symbol}/klines?interval={interval}&limit={limit}"
+    },
+    "intervals": {
+      "perps": [
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "4h",
+        "1D",
+        "1W",
+        "1M"
+      ],
+      "spot": [
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "4h",
+        "8h",
+        "12h",
+        "1D",
+        "3D",
+        "1W",
+        "1M"
+      ]
+    },
+    "intervals_verified_from": {
+      "perps": {
+        "url": "https://sodex.com/documentation/api/rest-v1/sodex-rest-perps-api",
+        "verified_on": "2026-04-23",
+        "notes": "Official docs list perps kline intervals as 1m, 5m, 15m, 30m, 1h, 4h, 1D, 1W, 1M."
+      },
+      "spot": {
+        "url": "https://sodex.com/documentation/api/rest-v1/sodex-rest-spot-api",
+        "verified_on": "2026-04-23",
+        "notes": "Official docs list spot kline intervals as 1m, 5m, 15m, 30m, 1h, 4h, 8h, 12h, 1D, 3D, 1W, 1M."
+      }
+    },
+    "example_requests": {
+      "btc_perps_1h": "https://mainnet-gw.sodex.dev/api/v1/perps/markets/BTC-USD/klines?interval=1h&limit=200",
+      "eth_perps_1h": "https://mainnet-gw.sodex.dev/api/v1/perps/markets/ETH-USD/klines?interval=1h&limit=200",
+      "btc_spot_1h": "https://mainnet-gw.sodex.dev/api/v1/spot/markets/vBTC_vUSDC/klines?interval=1h&limit=200",
+      "eth_spot_1h": "https://mainnet-gw.sodex.dev/api/v1/spot/markets/vETH_vUSDC/klines?interval=1h&limit=200"
+    }
+  },
+  "assets": {
+    "BTC": {
+      "label": "Bitcoin",
+      "priority": "core",
+      "suggested_sodex_symbols": {
+        "perps": [
+          "BTC-USD"
+        ],
+        "spot": [
+          "vBTC_vUSDC"
+        ]
+      },
+      "symbol_aliases": {
+        "plain": [
+          "BTC"
+        ],
+        "perps_candidates": [
+          "BTC-USD"
+        ],
+        "spot_candidates": [
+          "vBTC_vUSDC"
+        ]
+      },
+      "related_pairs": [
+        "ETH",
+        "SOL",
+        "BNB",
+        "AVAX",
+        "DOGE"
+      ],
+      "relation_reason": "Use ETH as major confirmation, SOL and AVAX for beta risk appetite, BNB for exchange and infra sentiment, and DOGE for speculative momentum."
+    },
+    "ETH": {
+      "label": "Ethereum",
+      "priority": "core",
+      "suggested_sodex_symbols": {
+        "perps": [
+          "ETH-USD"
+        ],
+        "spot": [
+          "vETH_vUSDC"
+        ]
+      },
+      "symbol_aliases": {
+        "plain": [
+          "ETH"
+        ],
+        "perps_candidates": [
+          "ETH-USD"
+        ],
+        "spot_candidates": [
+          "vETH_vUSDC"
+        ]
+      },
+      "related_pairs": [
+        "BTC",
+        "SOL",
+        "LINK",
+        "BNB",
+        "AVAX"
+      ],
+      "relation_reason": "Use BTC as macro leader, SOL and AVAX as beta Layer 1 peers, LINK for ecosystem beta, and BNB for exchange-led risk tone."
+    },
+    "SOL": {
+      "label": "Solana",
+      "priority": "high_beta",
+      "suggested_sodex_symbols": {
+        "perps": [
+          "SOL-USD"
+        ],
+        "spot": [
+          "vSOL_vUSDC"
+        ]
+      },
+      "symbol_aliases": {
+        "plain": [
+          "SOL"
+        ],
+        "perps_candidates": [
+          "SOL-USD"
+        ],
+        "spot_candidates": [
+          "vSOL_vUSDC"
+        ]
+      },
+      "related_pairs": [
+        "ETH",
+        "BTC",
+        "AVAX",
+        "SUI",
+        "ADA"
+      ],
+      "relation_reason": "Compare SOL against ETH and BTC as leaders, and AVAX, SUI, and ADA as Layer 1 peers."
+    },
+    "XRP": {
+      "label": "XRP",
+      "priority": "alt",
+      "suggested_sodex_symbols": {
+        "perps": [
+          "XRP-USD"
+        ],
+        "spot": [
+          "vXRP_vUSDC"
+        ]
+      },
+      "symbol_aliases": {
+        "plain": [
+          "XRP"
+        ],
+        "perps_candidates": [
+          "XRP-USD"
+        ],
+        "spot_candidates": [
+          "vXRP_vUSDC"
+        ]
+      },
+      "related_pairs": [
+        "BTC",
+        "ETH",
+        "HBAR",
+        "BNB"
+      ],
+      "relation_reason": "Use BTC and ETH as macro guides, HBAR as a possible payments-adjacent peer, and BNB as a general large-cap alt sentiment check."
+    },
+    "ADA": {
+      "label": "Cardano",
+      "priority": "alt",
+      "suggested_sodex_symbols": {
+        "perps": [
+          "ADA-USD"
+        ],
+        "spot": [
+          "vADA_vUSDC"
+        ]
+      },
+      "symbol_aliases": {
+        "plain": [
+          "ADA"
+        ],
+        "perps_candidates": [
+          "ADA-USD"
+        ],
+        "spot_candidates": [
+          "vADA_vUSDC"
+        ]
+      },
+      "related_pairs": [
+        "SOL",
+        "ETH",
+        "AVAX",
+        "SUI",
+        "BTC"
+      ],
+      "relation_reason": "Treat ADA as a Layer 1 peer set comparison against SOL, AVAX, and SUI, with ETH and BTC as higher-level leaders."
+    },
+    "DOGE": {
+      "label": "Dogecoin",
+      "priority": "speculative",
+      "suggested_sodex_symbols": {
+        "perps": [
+          "DOGE-USD"
+        ],
+        "spot": [
+          "vDOGE_vUSDC"
+        ]
+      },
+      "symbol_aliases": {
+        "plain": [
+          "DOGE"
+        ],
+        "perps_candidates": [
+          "DOGE-USD"
+        ],
+        "spot_candidates": [
+          "vDOGE_vUSDC"
+        ]
+      },
+      "related_pairs": [
+        "BTC",
+        "ETH",
+        "SOL",
+        "BNB"
+      ],
+      "relation_reason": "DOGE often reacts to broader speculative risk appetite, so compare it with BTC and ETH first, then SOL and BNB for alt beta."
+    },
+    "AVAX": {
+      "label": "Avalanche",
+      "priority": "high_beta",
+      "suggested_sodex_symbols": {
+        "perps": [
+          "AVAX-USD"
+        ],
+        "spot": [
+          "vAVAX_vUSDC"
+        ]
+      },
+      "symbol_aliases": {
+        "plain": [
+          "AVAX"
+        ],
+        "perps_candidates": [
+          "AVAX-USD"
+        ],
+        "spot_candidates": [
+          "vAVAX_vUSDC"
+        ]
+      },
+      "related_pairs": [
+        "SOL",
+        "ETH",
+        "ADA",
+        "SUI",
+        "BTC"
+      ],
+      "relation_reason": "AVAX works best in a Layer 1 comparison basket anchored by SOL and ETH."
+    },
+    "LINK": {
+      "label": "Chainlink",
+      "priority": "alt",
+      "suggested_sodex_symbols": {
+        "perps": [
+          "LINK-USD"
+        ],
+        "spot": [
+          "vLINK_vUSDC"
+        ]
+      },
+      "symbol_aliases": {
+        "plain": [
+          "LINK"
+        ],
+        "perps_candidates": [
+          "LINK-USD"
+        ],
+        "spot_candidates": [
+          "vLINK_vUSDC"
+        ]
+      },
+      "related_pairs": [
+        "ETH",
+        "BTC",
+        "BNB",
+        "SOL"
+      ],
+      "relation_reason": "LINK often behaves like an ETH-adjacent large-cap alt, so ETH is the primary comparison and BTC the macro anchor."
+    },
+    "HBAR": {
+      "label": "Hedera",
+      "priority": "alt",
+      "suggested_sodex_symbols": {
+        "perps": [
+          "HBAR-USD"
+        ],
+        "spot": [
+          "vHBAR_vUSDC"
+        ]
+      },
+      "symbol_aliases": {
+        "plain": [
+          "HBAR"
+        ],
+        "perps_candidates": [
+          "HBAR-USD"
+        ],
+        "spot_candidates": [
+          "vHBAR_vUSDC"
+        ]
+      },
+      "related_pairs": [
+        "XRP",
+        "BTC",
+        "ETH",
+        "ADA"
+      ],
+      "relation_reason": "HBAR can be compared with XRP for payments-adjacent behavior, then BTC and ETH for broader regime checks."
+    },
+    "SUI": {
+      "label": "Sui",
+      "priority": "high_beta",
+      "suggested_sodex_symbols": {
+        "perps": [
+          "SUI-USD"
+        ],
+        "spot": [
+          "vSUI_vUSDC"
+        ]
+      },
+      "symbol_aliases": {
+        "plain": [
+          "SUI"
+        ],
+        "perps_candidates": [
+          "SUI-USD"
+        ],
+        "spot_candidates": [
+          "vSUI_vUSDC"
+        ]
+      },
+      "related_pairs": [
+        "SOL",
+        "AVAX",
+        "ADA",
+        "ETH",
+        "BTC"
+      ],
+      "relation_reason": "SUI fits naturally into a high-beta Layer 1 comparison basket."
+    },
+    "BNB": {
+      "label": "BNB",
+      "priority": "core_alt",
+      "suggested_sodex_symbols": {
+        "perps": [
+          "BNB-USD"
+        ],
+        "spot": [
+          "vBNB_vUSDC"
+        ]
+      },
+      "symbol_aliases": {
+        "plain": [
+          "BNB"
+        ],
+        "perps_candidates": [
+          "BNB-USD"
+        ],
+        "spot_candidates": [
+          "vBNB_vUSDC"
+        ]
+      },
+      "related_pairs": [
+        "BTC",
+        "ETH",
+        "SOL",
+        "LINK"
+      ],
+      "relation_reason": "BNB is useful as a large-cap exchange and infrastructure proxy relative to BTC and ETH."
+    },
+    "SOSO": {
+      "label": "SoSoValue",
+      "priority": "emerging",
+      "suggested_sodex_symbols": {
+        "perps": [
+          "SOSO-USD"
+        ],
+        "spot": [
+          "vSOSO_vUSDC"
+        ]
+      },
+      "symbol_aliases": {
+        "plain": [
+          "SOSO"
+        ],
+        "perps_candidates": [
+          "SOSO-USD"
+        ],
+        "spot_candidates": [
+          "vSOSO_vUSDC"
+        ]
+      },
+      "related_pairs": [
+        "BNB",
+        "LINK",
+        "ETH",
+        "BTC"
+      ],
+      "relation_reason": "Treat SOSO as an emerging ecosystem token until live symbol verification is confirmed."
+    },
+    "XAUT": {
+      "label": "Tether Gold",
+      "priority": "macro_alt",
+      "suggested_sodex_symbols": {
+        "perps": [],
+        "spot": []
+      },
+      "symbol_aliases": {
+        "plain": [
+          "XAUT",
+          "GOLD"
+        ],
+        "perps_candidates": [],
+        "spot_candidates": []
+      },
+      "related_pairs": [
+        "PAXG",
+        "BTC",
+        "ETH"
+      ],
+      "relation_reason": "Use a gold basket only if the symbol exists on your data source. XAUT and PAXG are the natural pairings, with BTC and ETH as alternative hard-asset comparisons.",
+      "verification_status": "unverified_on_sodex_docs"
+    },
+    "PAXG": {
+      "label": "PAX Gold",
+      "priority": "macro_alt",
+      "suggested_sodex_symbols": {
+        "perps": [],
+        "spot": []
+      },
+      "symbol_aliases": {
+        "plain": [
+          "PAXG"
+        ],
+        "perps_candidates": [],
+        "spot_candidates": []
+      },
+      "related_pairs": [
+        "XAUT",
+        "BTC",
+        "ETH"
+      ],
+      "relation_reason": "Use alongside XAUT if supported by your exchange or API source.",
+      "verification_status": "unverified_on_sodex_docs"
+    }
+  },
+  "ui_defaults": {
+    "default_limit": 200,
+    "default_interval": "1h",
+    "comparison_baskets": {
+      "majors": [
+        "BTC",
+        "ETH",
+        "SOL",
+        "BNB"
+      ],
+      "layer1": [
+        "SOL",
+        "AVAX",
+        "SUI",
+        "ADA",
+        "ETH"
+      ],
+      "speculative": [
+        "DOGE",
+        "SOL",
+        "BNB",
+        "BTC"
+      ],
+      "payments": [
+        "XRP",
+        "HBAR",
+        "BTC",
+        "ETH"
+      ],
+      "gold_vs_crypto": [
+        "XAUT",
+        "PAXG",
+        "BTC",
+        "ETH"
+      ]
+    }
+  }
+}

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -53,20 +52,30 @@ def _component_story(component: dict[str, Any]) -> dict[str, Any]:
     """Build a presentation-friendly component card."""
     name = component["name"]
     details = component["details"]
+    is_unavailable = component["label"] == "unavailable"
 
     if name == "etf_trend":
-        summary = "ETF flows remain supportive." if component["label"] == "bullish" else "ETF flow momentum is fading."
+        summary = (
+            "ETF data is unavailable for this asset."
+            if is_unavailable
+            else "ETF flows remain supportive."
+            if component["label"] == "bullish"
+            else "ETF flow momentum is fading."
+        )
         calc_hint = "Latest ETF flow and the recent 5-period aggregate are used to frame institutional demand."
         evidence = {
             "latest_date": details.get("latest_date"),
             "latest_net_inflow_usd": details.get("latest_net_inflow_usd"),
             "five_day_net_inflow_usd": details.get("five_day_net_inflow_usd"),
             "positive_days_last_5": details.get("positive_days_last_5"),
+            "reason": details.get("reason"),
         }
         title = "ETF Trend"
     elif name == "positioning":
         summary = (
-            "Positioning supports the long side."
+            "Positioning data is unavailable for this asset."
+            if is_unavailable
+            else "Positioning supports the long side."
             if component["label"] == "bullish"
             else "Short-side positioning still dominates."
             if component["label"] == "bearish"
@@ -79,11 +88,14 @@ def _component_story(component: dict[str, Any]) -> dict[str, Any]:
             "latest_long_account_share": details.get("latest_long_account_share"),
             "latest_short_account_share": details.get("latest_short_account_share"),
             "average_ratio_sample": details.get("average_ratio_sample"),
+            "reason": details.get("reason"),
         }
         title = "Positioning"
     elif name == "price_confirmation":
         summary = (
-            "Price is confirming momentum."
+            "Price data is unavailable for this asset."
+            if is_unavailable
+            else "Price is confirming momentum."
             if component["label"] == "bullish"
             else "Price action is weakening."
             if component["label"] == "bearish"
@@ -98,11 +110,14 @@ def _component_story(component: dict[str, Any]) -> dict[str, Any]:
             "sma_3": details.get("sma_3"),
             "sma_5": details.get("sma_5"),
             "source": details.get("source"),
+            "reason": details.get("reason"),
         }
         title = "Price Confirmation"
     elif name == "funding_rates":
         summary = (
-            "Funding is easing crowding pressure."
+            "Funding data is unavailable for this asset."
+            if is_unavailable
+            else "Funding is easing crowding pressure."
             if component["label"] == "bullish"
             else "Funding argues against aggressive leverage."
             if component["label"] == "bearish"
@@ -116,11 +131,14 @@ def _component_story(component: dict[str, Any]) -> dict[str, Any]:
             "extreme_threshold": details.get("extreme_threshold"),
             "sample_size": details.get("sample_size"),
             "mark_price": details.get("mark_price"),
+            "reason": details.get("reason"),
         }
         title = "Funding"
     elif name == "futures_open_interest":
         summary = (
-            "Open interest is confirming price participation."
+            "Open-interest data is unavailable for this asset."
+            if is_unavailable
+            else "Open interest is confirming price participation."
             if component["label"] == "bullish"
             else "Open interest is building against weak price."
             if component["label"] == "bearish"
@@ -136,11 +154,14 @@ def _component_story(component: dict[str, Any]) -> dict[str, Any]:
             "reference_price_change_pct": details.get("reference_price_change_pct"),
             "binance_open_interest": details.get("binance_open_interest"),
             "cme_open_interest": details.get("cme_open_interest"),
+            "reason": details.get("reason"),
         }
         title = "Futures Open Interest"
     elif name == "depth_asymmetry":
         summary = (
-            "Spot depth is more resilient on the downside."
+            "Pair-depth data is unavailable for this asset."
+            if is_unavailable
+            else "Spot depth is more resilient on the downside."
             if component["label"] == "bullish"
             else "Spot depth looks fragile on the downside."
             if component["label"] == "bearish"
@@ -152,11 +173,14 @@ def _component_story(component: dict[str, Any]) -> dict[str, Any]:
             "weighted_cost_to_move_up_usd": details.get("weighted_cost_to_move_up_usd"),
             "weighted_cost_to_move_down_usd": details.get("weighted_cost_to_move_down_usd"),
             "markets_used": details.get("markets_used"),
+            "reason": details.get("reason"),
         }
         title = "Depth Asymmetry"
     elif name == "breadth_regime":
         summary = (
-            "Breadth is supporting the asset move."
+            "Breadth data is unavailable for this asset."
+            if is_unavailable
+            else "Breadth is supporting the asset move."
             if component["label"] == "bullish"
             else "Breadth is diverging against the asset move."
             if component["label"] == "bearish"
@@ -168,11 +192,14 @@ def _component_story(component: dict[str, Any]) -> dict[str, Any]:
             "sector_change_pct_24h": details.get("sector_change_pct_24h"),
             "sector_marketcap_dom": details.get("sector_marketcap_dom"),
             "index_snapshots": details.get("index_snapshots"),
+            "reason": details.get("reason"),
         }
         title = "Breadth Regime"
     elif name == "fear_greed":
         summary = (
-            "Fear is elevated but stabilizing."
+            "Fear & greed data is unavailable."
+            if is_unavailable
+            else "Fear is elevated but stabilizing."
             if component["label"] == "bullish"
             else "Greed is stretched."
             if component["label"] == "bearish"
@@ -183,6 +210,7 @@ def _component_story(component: dict[str, Any]) -> dict[str, Any]:
             "latest_date": details.get("latest_date"),
             "latest_index_value": details.get("latest_index_value"),
             "previous_index_value": details.get("previous_index_value"),
+            "reason": details.get("reason"),
         }
         title = "Fear & Greed"
     else:
@@ -195,6 +223,7 @@ def _component_story(component: dict[str, Any]) -> dict[str, Any]:
         "name": title,
         "state": component["label"],
         "score": component["score"],
+        "score_display": "Unavailable" if is_unavailable else component["score"],
         "visual_score": _visual_score(component),
         "summary": summary,
         "calc_hint": calc_hint,
@@ -279,6 +308,14 @@ def build_signal_story(signal: dict[str, Any], decision: dict[str, Any]) -> dict
     }
 
 
+def build_enriched_output(output: dict[str, Any]) -> dict[str, Any]:
+    """Attach snapshot metadata before writing or publishing outputs."""
+    return {
+        "snapshot": _snapshot_metadata(output["signal"]),
+        **output,
+    }
+
+
 def write_result_files(asset: str, output: dict[str, Any], *, root: str | Path = "results") -> dict[str, str]:
     """Write machine output and presentation story files for an asset."""
     asset_dir = Path(root) / asset.lower()
@@ -287,10 +324,7 @@ def write_result_files(asset: str, output: dict[str, Any], *, root: str | Path =
     signal_output_path = asset_dir / "signal_output.json"
     signal_story_path = asset_dir / "signal_story.json"
 
-    enriched_output = {
-        "snapshot": _snapshot_metadata(output["signal"]),
-        **output,
-    }
+    enriched_output = build_enriched_output(output)
 
     signal_output_path.write_text(json.dumps(enriched_output, indent=2), encoding="utf-8")
     signal_story_path.write_text(
@@ -301,42 +335,4 @@ def write_result_files(asset: str, output: dict[str, Any], *, root: str | Path =
     return {
         "signal_output": str(signal_output_path),
         "signal_story": str(signal_story_path),
-    }
-
-
-def write_signal_snapshot_bundle(
-    *,
-    assets: tuple[str, ...] = ("btc", "eth"),
-    results_root: str | Path = "results",
-    snapshot_root: str | Path = "signal_snapshots",
-    snapshot_name: str | None = None,
-) -> dict[str, Any]:
-    """Copy the latest asset result files into a timestamped snapshot folder."""
-    results_dir = Path(results_root)
-    snapshot_dir = Path(snapshot_root) / (snapshot_name or _local_snapshot_stamp())
-    snapshot_dir.mkdir(parents=True, exist_ok=True)
-
-    copied_files: dict[str, dict[str, str]] = {}
-    for asset in assets:
-        asset_key = asset.lower()
-        asset_results_dir = results_dir / asset_key
-        signal_output_path = asset_results_dir / "signal_output.json"
-        signal_story_path = asset_results_dir / "signal_story.json"
-
-        if not signal_output_path.exists() or not signal_story_path.exists():
-            raise FileNotFoundError(f"Missing result files for asset '{asset_key}' in {asset_results_dir}")
-
-        snapshot_output_path = snapshot_dir / f"{asset_key}_signal_output.json"
-        snapshot_story_path = snapshot_dir / f"{asset_key}_signal_story.json"
-        shutil.copy2(signal_output_path, snapshot_output_path)
-        shutil.copy2(signal_story_path, snapshot_story_path)
-
-        copied_files[asset_key] = {
-            "signal_output": str(snapshot_output_path),
-            "signal_story": str(snapshot_story_path),
-        }
-
-    return {
-        "snapshot_dir": str(snapshot_dir),
-        "assets": copied_files,
     }
