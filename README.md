@@ -10,6 +10,8 @@ The backend is responsible for:
 - refreshing website cache payloads
 - generating quick-trade snapshots
 
+Supabase automation is already in place for the website path. The hosted run updates the live website data roughly every 14 to 16 minutes.
+
 ## How The Decision Engine Works
 
 The engine is a multi-factor scoring system, not a single-indicator signal.
@@ -97,6 +99,7 @@ python scripts/quick_trade_snapshots.py
 ```
 
 5. If Supabase credentials are configured, the outputs will be published to the database automatically.
+6. In the hosted setup, Supabase automation refreshes the website-facing data roughly every 14 to 16 minutes.
 
 ### What You Need
 
@@ -125,6 +128,8 @@ What each variable is for:
 
 If `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are present, the backend publishes live outputs automatically.
 
+Website news is not published by this backend. The website repo uses its own news API routes and SoSoValue-powered news reads separately.
+
 No third-party packages are required. The code uses only the Python standard library.
 
 ### What Happens When You Run It
@@ -137,7 +142,7 @@ No third-party packages are required. The code uses only the Python standard lib
   - `latest_asset_state`
   - `decision_runs`
   - `site_cache`
-  - `news_events`
+- in the hosted deployment, Supabase automation refreshes those website-facing tables roughly every 14 to 16 minutes
 
 ### Minimal Review Flow
 
@@ -151,8 +156,6 @@ For a judge or reviewer, the simplest path is:
 
 ## Scripts
 
-- `python scripts/btc_signal.py`
-- `python scripts/eth_signal.py`
 - `python scripts/daily_signals.py`
 - `python scripts/quick_trade_snapshots.py`
 
@@ -160,7 +163,6 @@ If Supabase env vars are configured, the daily runner also publishes:
 
 - historical rows into `decision_runs`
 - one latest row per asset into `latest_asset_state`
-- historical news rows into `news_events`
 - shared cache payloads into `site_cache`
 
 Create those tables in Supabase with:
@@ -191,8 +193,6 @@ Create those tables in Supabase with:
   used to refresh the latest reference price on top of recent daily context
 - SoSoValue currency klines:
   used for daily price confirmation context where supported
-- CoinDesk RSS:
-  used for the website news timeline and chart-marker pipeline
 
 ## Notes
 
@@ -200,6 +200,5 @@ Create those tables in Supabase with:
 - The live SoSoValue ETF current metrics response returns `data` as an object with totals plus `list`.
 - ETF is wired for BTC and ETH only.
 - Price confirmation now uses SoDEX perps daily klines with lowercase interval `1d`.
-- `site_cache` now includes per-asset news cache keys like `news_chart_btc`.
-- `news_events` stores individual historical news items for website timelines and chart overlays.
+- Website news is handled in the website repo through dedicated news API routes.
 - Keep request frequency low while iterating. These scripts intentionally do only a handful of calls.

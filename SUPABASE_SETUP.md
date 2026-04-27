@@ -6,11 +6,13 @@ This project uses Supabase as the storage and read layer for:
 - latest BTC/ETH state for the frontend
 - website-ready cached JSON payloads
 
+In the current hosted setup, Supabase automation refreshes the website-facing signal data roughly every 14 to 16 minutes.
+
 The Python decision engine still runs in this repo. Supabase stores the outputs.
 
 ## What We Are Building
 
-Every 20 minutes, a server-side runner should:
+Roughly every 14 to 16 minutes, a server-side runner should:
 
 1. Fetch SoSoValue and other source data
 2. Run the BTC and ETH decision engines
@@ -38,7 +40,7 @@ That means there are two clean options:
 Recommended now:
 - use Supabase for database + frontend reads
 - keep the Python runner
-- schedule the Python runner externally every 20 minutes
+- use the hosted Supabase automation cadence that refreshes roughly every 14 to 16 minutes
 
 ## Environment Variables
 
@@ -91,7 +93,6 @@ This creates:
 
 - `decision_runs`
 - `latest_asset_state`
-- `news_events`
 - `site_cache`
 
 It also configures RLS so:
@@ -136,23 +137,14 @@ Current cache keys written by the runner:
 
 - `engine_summary`
 - `market_overview`
+- `quick_trade_inputs_btc`
+- `quick_trade_inputs_eth`
 
 Useful for:
 
 - homepage sections
 - market context cards
 - frontend-friendly combined payloads
-
-### `news_events`
-
-This stores individual token-filtered news items for historical website features.
-
-Useful for:
-
-- chart news overlays
-- recent event timelines
-- grouped headline history
-- per-asset news review
 
 ## Step 4: Run the Existing Publisher
 
@@ -163,17 +155,11 @@ The current publishing flow is already wired in:
 If `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are present, this script will:
 
 1. Generate BTC and ETH outputs
-2. Save local JSON files
-3. Insert rows into `decision_runs`
-4. Upsert rows into `latest_asset_state`
-5. Upsert rows into `news_events`
-6. Upsert cache payloads into `site_cache`
+2. Insert rows into `decision_runs`
+3. Upsert rows into `latest_asset_state`
+4. Upsert cache payloads into `site_cache`
 
-There is also a one-off backfill script for recent news history:
-
-- [scripts/backfill_news_history.py](/c:/Users/elias/Desktop/narralytica_v2/scripts/backfill_news_history.py)
-
-Run it with your existing Python runtime.
+Website news is handled in the website repo through its own news API routes. It is not part of the active backend publishing path here.
 
 ## Step 5: Frontend Read Pattern
 
@@ -188,17 +174,13 @@ Recommended frontend reads:
 3. Read `site_cache` where `cache_key = 'market_overview'`
    Use this for fear/greed, ETF metrics, futures context, and sector context.
 
-4. Read `site_cache` where `cache_key = 'news_chart_crypto'`
-   Use this for market-wide chart-ready grouped news markers.
-
-5. Read `news_events`
-   Use this for richer historical news timelines and individual event history.
-
-6. Read `decision_runs`
+4. Read `decision_runs`
    Use this later for signal history, audits, and historical chart pages.
 
-7. Read `site_cache` where `cache_key = 'quick_trade_inputs_btc'` or `quick_trade_inputs_eth`
+5. Read `site_cache` where `cache_key = 'quick_trade_inputs_btc'` or `quick_trade_inputs_eth`
    Use this for Quick Trade inputs and tactical setup reads.
+
+Website news should be documented and consumed from the website repo, since that is where the live news APIs are used.
 
 ## Example SQL Checks
 
@@ -223,29 +205,15 @@ order by snapshot_time_utc desc
 limit 10;
 ```
 
-```sql
-select asset, news_id, release_time_utc, title, is_major
-from public.news_events
-order by release_time_utc desc
-limit 20;
-```
-
 ## Recommended Scheduling
 
-For now, schedule the Python runner externally every 20 minutes.
+The active hosted setup uses Supabase automation and refreshes website-facing signal data roughly every 14 to 16 minutes.
 
-Recommended first choice:
+That is the cadence the website should expect for:
 
-- GitHub Actions cron every 20 minutes
-
-Why:
-
-- easy to set secrets
-- easy to review logs
-- no rewrite required
-- works well with this existing Python repo
-
-Later, if you want everything deeper inside the Supabase ecosystem, we can migrate the runner to an Edge Function.
+- `latest_asset_state`
+- `site_cache` overview payloads
+- `site_cache` quick-trade payloads
 
 ## Next Best Step
 
@@ -253,5 +221,5 @@ After the database is created, the next step is:
 
 1. add real Supabase credentials to `.env`
 2. run the daily runner once
-3. verify data appears in the three tables
+3. verify data appears in the core tables
 4. wire the frontend to read `latest_asset_state` and `site_cache`
